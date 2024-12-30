@@ -19,7 +19,9 @@ INSTALLED_APPS = [
     # 'django.contrib.messages',
     # 'django.contrib.staticfiles',
     'rest_framework',
-    'users',  # Your custom user app
+    'rest_framework_simplejwt',
+    'users',
+    'books'
 ]
 
 MIDDLEWARE = [
@@ -27,11 +29,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'users.middleware.JSONResponseMiddleware',
-    'users.middleware.CustomExceptionMiddleware',
+    'belajar_django.middlewares.JSONResponseMiddleware',
+    'belajar_django.middlewares.CustomExceptionMiddleware',
 ]
 
-ROOT_URLCONF = 'belajar-django.urls'
+ROOT_URLCONF = 'belajar_django.urls'
 
 TEMPLATES = [
     {
@@ -47,7 +49,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'belajar-django.wsgi.application'
+WSGI_APPLICATION = 'belajar_django.wsgi.application'
 
 # PostgreSQL Database configuration
 DATABASES = {
@@ -67,6 +69,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Default permission class
+    ],
+    'EXCEPTION_HANDLER': 'belajar_django.exception_handler.custom_exception_handler',
 }
 
 SIMPLE_JWT = {

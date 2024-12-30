@@ -15,7 +15,7 @@ class JSONResponseMiddleware:
                 return response
 
             # Ensure consistent JSON format
-            response_data = response.json()
+            response_data = response.json()  # Will fail if not JsonResponse
             formatted_data = {
                 "code": response.status_code,
                 "message": "success" if response.status_code < 400 else "error",
@@ -24,7 +24,6 @@ class JSONResponseMiddleware:
             return JsonResponse(formatted_data, status=response.status_code)
         except Exception as e:
             logger.error(f"Error in middleware: {str(e)}")
-            # This will give you more details on the error
             return JsonResponse({
                 "code": 500,
                 "message": f"Server error: {str(e)}",

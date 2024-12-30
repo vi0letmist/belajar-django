@@ -1,0 +1,1 @@
+UNAUTHORIZED_MESSAGE = "You are not authorized to access this API. Please authenticate."

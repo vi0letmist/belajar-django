@@ -1,4 +1,4 @@
-from users.models import User
+from .models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -34,7 +34,7 @@ class TokenObtainPairSerializer(serializers.Serializer):
 
     def validate(self, data):
         from django.contrib.auth import authenticate
-        user = authenticate(username=data['username'], password=data['password'])
+        user = authenticate(**data)
         
         if not user:
             raise serializers.ValidationError('Invalid credentials. Please check your username and password.')
