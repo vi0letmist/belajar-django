@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAuthenticated as CustomIsAuthenticated
-from .models import Book
-from .serializers import BookSerializer, BookSerializerDetail
+from .models import BorrowRecords
+from .serializers import BorrowRecordsSerializer, BorrowRecordsSerializerDetail
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,9 +10,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 from django.utils.timezone import now
 
-class BookListCreateView(APIView):
+class BorrowRecordsListCreateView(APIView):
     """
-    View to list all books and create a new book.
+    View to list all borrow records and create a new borrow records.
     """
     permission_classes = [CustomIsAuthenticated]
 
@@ -28,11 +28,11 @@ class BookListCreateView(APIView):
                     "message": "'page' and 'limit' must be greater than 0.",
                     "data": None
                 }, status=status.HTTP_400_BAD_REQUEST)
-
-            queryset = Book.objects.select_related('genre').filter(deleted_at__isnull=True)
+            
+            queryset = BorrowRecords.objects.select_related('book', 'user').filter(deleted_at__isnull=True)
 
             if title:
-                queryset = queryset.filter(title__icontains=title)
+                queryset = queryset.filter(book__title__icontains=title)
 
             queryset = queryset.order_by('created_at')
 
@@ -43,10 +43,10 @@ class BookListCreateView(APIView):
             end = start + per_page
             paginated_queryset = queryset[start:end]
 
-            serializer = BookSerializerDetail(paginated_queryset, many=True)
+            serializer = BorrowRecordsSerializerDetail(paginated_queryset, many=True)
             return Response({
                 "code": 200,
-                "message": "Book retrieved successfully.",
+                "message": "Borrow Records retrieved successfully.",
                 "data": {
                     "page": page,
                     "total": total_records,
@@ -55,7 +55,7 @@ class BookListCreateView(APIView):
                     "data": serializer.data,
                 }
             }, status=status.HTTP_200_OK)
-
+        
         except ValueError:
             return Response({
                 "code": 400,
@@ -71,20 +71,23 @@ class BookListCreateView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
-        serializer = BookSerializer(data=request.data)
+        serializer = BorrowRecordsSerializer(data=request.data)
         if serializer.is_valid():
-            book = serializer.save()
+            data = serializer.save()
 
             response_data = {
-                "id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "genre_name": book.genre.name if book.genre else None,
+                "id": data.id,
+                "title": data.book.title if data.book else None,
+                "author": data.book.author if data.book else None,
+                "user_name": data.user.fullname if data.user else None,
+                "borrow_date": data.borrow_date,
+                "due_date": data.due_date,
+                "return_date": data.return_date,
             }
 
             return Response({
                 "code": 201,
-                "message": "Book created successfully.",
+                "message": "Borrow Records created successfully.",
                 "data": response_data
             }, status=status.HTTP_201_CREATED)
 
@@ -94,7 +97,7 @@ class BookListCreateView(APIView):
             "data": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
 
-class BookDetailView(APIView):
+class BorrowRecordsDetailView(APIView):
     """
     View to retrieve, update or delete a book instance.
     """
@@ -102,32 +105,32 @@ class BookDetailView(APIView):
 
     def get_object(self, pk):
         try:
-            return Book.objects.get(pk=pk)
+            return BorrowRecords.objects.get(pk=pk)
         except ObjectDoesNotExist:
             raise Http404
 
     def get(self, request, pk):
         try:
-            book = self.get_object(pk)
+            borrow_record = self.get_object(pk)
 
-            if book.deleted_at is not None:
+            if borrow_record.deleted_at is not None:
                 return Response({
                     "code": 404,
-                    "message": "Book not found or has been deleted.",
+                    "message": "Borrow Records not found or has been deleted.",
                     "data": None
                 }, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = BookSerializerDetail(book)
+            serializer = BorrowRecordsSerializerDetail(borrow_record)
             return Response({
                 "code": 200,
-                "message": "Book retrieved successfully.",
+                "message": "Borrow Records retrieved successfully.",
                 "data": serializer.data
             }, status=status.HTTP_200_OK)
 
         except Http404:
             return Response({
                 "code": 404,
-                "message": "Book not found.",
+                "message": "Borrow Records not found.",
                 "data": None
             }, status=status.HTTP_404_NOT_FOUND)
         
@@ -139,13 +142,13 @@ class BookDetailView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def put(self, request, pk):
-        book = self.get_object(pk)
-        serializer = BookSerializerDetail(book, data=request.data)
+        borrow_record = self.get_object(pk)
+        serializer = BorrowRecordsSerializerDetail(borrow_record, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({
                 "code": 200,
-                "message": "Book updated successfully.",
+                "message": "Borrow Records updated successfully.",
                 "data": serializer.data
             }, status=status.HTTP_200_OK)
 
@@ -157,22 +160,25 @@ class BookDetailView(APIView):
 
     def delete(self, request, pk):
         try:
-            book = self.get_object(pk)
+            borrow_record = self.get_object(pk)
 
-            book.deleted_at = now()
-            book.save()
+            borrow_record.deleted_at = now()
+            borrow_record.save()
 
             response_data = {
-                "id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "genre_name": book.genre.name if book.genre else None,
-                "deleted_at": book.deleted_at
+                "id": borrow_record.id,
+                "title": borrow_record.book.title if borrow_record.book else None,
+                "author": borrow_record.book.author if borrow_record.book else None,
+                "user_name": borrow_record.user.fullname if borrow_record.user else None,
+                "borrow_date": borrow_record.borrow_date,
+                "due_date": borrow_record.due_date,
+                "return_date": borrow_record.return_date,
+                "deleted_at": borrow_record.deleted_at
             }
 
             return Response({
                 "code": 200,
-                "message": "Book deleted successfully.",
+                "message": "Borrow Records deleted successfully.",
                 "data": response_data
             }, status=status.HTTP_200_OK)
 

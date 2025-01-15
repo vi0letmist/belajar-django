@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.utils.timezone import now
-import uuid  # For generating UUIDs
+import uuid
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, role='Member', **extra_fields):
@@ -24,6 +24,10 @@ class UserManager(BaseUserManager):
 
         return self.create_user(username, email, password, **extra_fields)
 
+class TimestampWithoutTZField(models.DateTimeField):
+    def db_type(self, connection):
+        return 'timestamp without time zone'
+
 class User(AbstractBaseUser):
     ROLE_CHOICES = [
         ('Member', 'Member'),
@@ -36,10 +40,10 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=True, null=False, blank=False)
     email = models.EmailField(unique=True, null=False, blank=False)
     password = models.CharField(max_length=255, null=False, blank=False)
-    last_login = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
+    last_login = TimestampWithoutTZField(auto_now=True)
+    created_at = TimestampWithoutTZField(auto_now_add=True)
+    updated_at = TimestampWithoutTZField(auto_now=True)
+    deleted_at = TimestampWithoutTZField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Member')
 

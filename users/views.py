@@ -6,6 +6,8 @@ from rest_framework.exceptions import ValidationError
 from .serializers import RegisterSerializer, TokenObtainPairSerializer
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():

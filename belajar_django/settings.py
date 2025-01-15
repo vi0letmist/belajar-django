@@ -21,7 +21,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
-    'books'
+    'books',
+    'borrow_records',
 ]
 
 MIDDLEWARE = [
@@ -87,3 +88,9 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+APPEND_SLASH=False
+
+#TIMEZONE
+USE_TZ = False
+TIME_ZONE = "Asia/Jakarta"
+
