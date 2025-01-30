@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAuthenticated as CustomIsAuthenticated
 from .models import BorrowRecords
-from .serializers import BorrowRecordsSerializer, BorrowRecordsSerializerDetail
+from .serializers import BorrowRecordsSerializer, BorrowRecordsSerializerDetail, BorrowRecordsUpdateSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -143,7 +143,8 @@ class BorrowRecordsDetailView(APIView):
 
     def put(self, request, pk):
         borrow_record = self.get_object(pk)
-        serializer = BorrowRecordsSerializerDetail(borrow_record, data=request.data)
+        serializer = BorrowRecordsUpdateSerializer(borrow_record, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
             return Response({
