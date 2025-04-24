@@ -29,7 +29,7 @@ class BookListCreateView(APIView):
                     "data": None
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            queryset = Book.objects.select_related('genre').filter(deleted_at__isnull=True)
+            queryset = Book.objects.prefetch_related('genres').filter(deleted_at__isnull=True)
 
             if title:
                 queryset = queryset.filter(title__icontains=title)
@@ -74,12 +74,13 @@ class BookListCreateView(APIView):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
             book = serializer.save()
+            genre_names = [genre.name for genre in book.genres.all()]
 
             response_data = {
                 "id": book.id,
                 "title": book.title,
                 "author": book.author,
-                "genre_name": book.genre.name if book.genre else None,
+                "genre_name": genre_names,
             }
 
             return Response({

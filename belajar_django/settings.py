@@ -94,3 +94,6 @@ APPEND_SLASH=False
 USE_TZ = False
 TIME_ZONE = "Asia/Jakarta"
 
+# MEDIA
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -1,14 +1,26 @@
 # books/serializers.py
 from rest_framework import serializers
-from .models import Book
+from .models import Book, Genre
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['id', 'title', 'author', 'isbn', 'published_date', 'genre', 'available_copies', 'created_at', 'updated_at', 'deleted_at']
+        fields = ['id', 'cover', 'title', 'author', 'isbn', 'published_date',
+                  'publisher', 'pages', 'description', 'language', 'genres',
+                  'available_copies', 'created_at', 'updated_at', 'deleted_at']
 
 class BookSerializerDetail(serializers.ModelSerializer):
-    genre_name = serializers.CharField(source='genre.name', read_only=True)
+    genres = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Genre.objects.all()
+    )
     class Meta:
         model = Book
-        fields = ['id', 'title', 'author', 'isbn', 'published_date', 'available_copies', 'genre_name']
+        fields = ['id', 'cover', 'title', 'author', 'isbn', 'published_date',
+                  'publisher', 'pages', 'description', 'language',
+                  'available_copies', 'genres']
+        
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['genres'] = [genre.name for genre in instance.genres.all()]
+        return rep
