@@ -1,4 +1,3 @@
-from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAuthenticated as CustomIsAuthenticated
 from .models import Book
 from .serializers import BookSerializer, BookSerializerDetail

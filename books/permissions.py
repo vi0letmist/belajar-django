@@ -4,6 +4,9 @@ from belajar_django.constants import UNAUTHORIZED_MESSAGE
 
 class IsAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.method == "GET":
+            return True
+        
         if not request.user.is_authenticated:
             raise PermissionDenied(UNAUTHORIZED_MESSAGE)
 
