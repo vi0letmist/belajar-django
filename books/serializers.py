@@ -24,3 +24,8 @@ class BookSerializerDetail(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         rep['genres'] = [genre.name for genre in instance.genres.all()]
         return rep
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['id', 'name']

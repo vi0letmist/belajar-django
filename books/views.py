@@ -1,6 +1,6 @@
 from .permissions import IsAuthenticated as CustomIsAuthenticated
-from .models import Book
-from .serializers import BookSerializer, BookSerializerDetail
+from .models import Book, Genre
+from .serializers import BookSerializer, BookSerializerDetail, GenreSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -174,6 +174,30 @@ class BookDetailView(APIView):
                 "code": 200,
                 "message": "Book deleted successfully.",
                 "data": response_data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "code": 500,
+                "message": f"An error occurred: {str(e)}",
+                "data": None
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GenresView(APIView):
+    """
+    View to list all genres.
+    """
+    permission_classes = [CustomIsAuthenticated]
+
+    def get(self, request):
+        try:
+            genres = Genre.objects.all()
+
+            serializer = GenreSerializer(genres, many=True)
+            return Response({
+                "code": 200,
+                "message": "Genres retrieved successfully.",
+                "data": serializer.data
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
