@@ -1,6 +1,8 @@
-from .models import User
+from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
+
+User = get_user_model()
 
 # User Registration Serializer
 class RegisterSerializer(serializers.ModelSerializer):
@@ -29,16 +31,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 # JWT Token Serializer (For Login)
 class TokenObtainPairSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    usernameOrEmail = serializers.CharField()
     password = serializers.CharField()
 
     def validate(self, data):
-        from django.contrib.auth import authenticate
-        user = authenticate(**data)
-        
+        identifier = data.get('usernameOrEmail')
+        password = data.get('password')
+
+        # Check if the identifier is an email
+        if '@' in identifier:
+            try:
+                user = User.objects.get(email=identifier)
+                identifier = user.username  # Convert to username for auth
+            except User.DoesNotExist:
+                raise serializers.ValidationError('Invalid email or password.')
+
+        user = authenticate(username=identifier, password=password)
+
         if not user:
-            raise serializers.ValidationError('Invalid credentials. Please check your username and password.')
-        
+            raise serializers.ValidationError('Invalid credentials. Please check your username or email and password.')
+
         refresh = RefreshToken.for_user(user)
         return {
             'access': str(refresh.access_token),
