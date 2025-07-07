@@ -25,7 +25,6 @@ class RegisterView(APIView):
                     "data": None
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Validation errors
         return Response({
             "code": 400,
             "message": "Validation error",
@@ -38,7 +37,6 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = TokenObtainPairSerializer(data=request.data)
         
-        # Check if the serializer is valid
         if serializer.is_valid():
             return Response({
                 "code": 200,
@@ -46,7 +44,6 @@ class LoginView(APIView):
                 "data": serializer.validated_data
             }, status=status.HTTP_200_OK)
 
-        # Specific message for invalid credentials
         return Response({
             "code": 400,
             "message": "Invalid credentials. Please check your username and password.",
