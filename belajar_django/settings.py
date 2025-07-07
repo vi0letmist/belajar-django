@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'users',
     'books',
     'borrow_records',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -32,6 +33,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'belajar_django.middlewares.JSONResponseMiddleware',
     'belajar_django.middlewares.CustomExceptionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'belajar_django.urls'
@@ -71,7 +73,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Default permission class
+        'rest_framework.permissions.AllowAny',  # Default permission class
     ],
     'EXCEPTION_HANDLER': 'belajar_django.exception_handler.custom_exception_handler',
 }
@@ -94,3 +96,12 @@ APPEND_SLASH=False
 USE_TZ = False
 TIME_ZONE = "Asia/Jakarta"
 
+# MEDIA
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# CORS
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3001",
+]
