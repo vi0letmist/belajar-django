@@ -1,13 +1,14 @@
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAuthenticated as CustomIsAuthenticated
 from .models import BorrowRecords
+from books.models import Book
 from .serializers import BorrowRecordsSerializer, BorrowRecordsSerializerDetail, BorrowRecordsUpdateSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F
+from django.db.models import OuterRef, Subquery, F
 from django.utils.timezone import now
 
 class BorrowRecordsListCreateView(APIView):
@@ -183,6 +184,42 @@ class BorrowRecordsDetailView(APIView):
                 "data": response_data
             }, status=status.HTTP_200_OK)
 
+        except Exception as e:
+            return Response({
+                "code": 500,
+                "message": f"An error occurred: {str(e)}",
+                "data": None
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class LastBorrowedBookView(APIView):
+    """
+    last borrowed book.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+
+            borrow_records = BorrowRecords.objects.select_related('book').prefetch_related('book__genres').filter(
+                user=user,
+                book__deleted_at__isnull=True
+            ).order_by('book','-borrow_date').distinct('book')[:5]
+
+            serializer = BorrowRecordsSerializerDetail(borrow_records, many=True)
+            return Response({
+                "code": 200,
+                "message": "Book Records retrieved successfully.",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Http404:
+            return Response({
+                "code": 404,
+                "message": "Book not found.",
+                "data": None
+            }, status=status.HTTP_404_NOT_FOUND)
+        
         except Exception as e:
             return Response({
                 "code": 500,

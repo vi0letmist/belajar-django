@@ -38,6 +38,7 @@ class Book(models.Model):
     language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='id')
     genres = models.ManyToManyField(Genre, related_name="books")
     available_copies = models.IntegerField(default=0)
+    is_must_read = models.BooleanField(default=False)
     created_at = TimestampWithoutTZField(auto_now_add=True)
     updated_at = TimestampWithoutTZField(auto_now=True)
     deleted_at = TimestampWithoutTZField(null=True, blank=True)
