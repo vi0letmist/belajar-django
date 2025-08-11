@@ -6,8 +6,8 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ['vi0letmist.pythonanywhere.com']
 SECRET_KEY = 'gm0J29qbaz0y4sOCupkAicC4ZfZWkv4BeC5NrDa-iFS1ycaHjoFcYFvRX3pp2MTUc-Y'
 
 # Application definition
@@ -17,7 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     # 'django.contrib.sessions',
     # 'django.contrib.messages',
-    # 'django.contrib.staticfiles',
+    'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
@@ -86,7 +86,8 @@ SIMPLE_JWT = {
 }
 
 # Static files (CSS, JavaScript, images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
