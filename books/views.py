@@ -1,5 +1,6 @@
-from .permissions import IsAuthenticated as CustomIsAuthenticated
+from .permissions import CustomIsAuthenticated
 from .models import Book, Genre
+from borrow_records.models import BorrowRecords
 from .serializers import BookSerializer, BookSerializerDetail, GenreSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -176,6 +177,68 @@ class BookDetailView(APIView):
                 "data": response_data
             }, status=status.HTTP_200_OK)
 
+        except Exception as e:
+            return Response({
+                "code": 500,
+                "message": f"An error occurred: {str(e)}",
+                "data": None
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class BookNewCollectionsView(APIView):
+    """
+    new collections book.
+    """
+    permission_classes = [CustomIsAuthenticated]
+
+    def get(self, request):
+        try:
+            books = Book.objects.filter(deleted_at__isnull=True).order_by(F('created_at').desc()).distinct()[:5]
+
+            serializer = BookSerializerDetail(books, many=True)
+            return Response({
+                "code": 200,
+                "message": "Book retrieved successfully.",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Http404:
+            return Response({
+                "code": 404,
+                "message": "Book not found.",
+                "data": None
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({
+                "code": 500,
+                "message": f"An error occurred: {str(e)}",
+                "data": None
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BookMustReadView(APIView):
+    """
+    must read selection books.
+    """
+    permission_classes = [CustomIsAuthenticated]
+
+    def get(self, request):
+        try:
+            books = Book.objects.filter(is_must_read=True, deleted_at__isnull=True)
+
+            serializer = BookSerializerDetail(books, many=True)
+            return Response({
+                "code": 200,
+                "message": "Book retrieved successfully.",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Http404:
+            return Response({
+                "code": 404,
+                "message": "Book not found.",
+                "data": None
+            }, status=status.HTTP_404_NOT_FOUND)
+        
         except Exception as e:
             return Response({
                 "code": 500,

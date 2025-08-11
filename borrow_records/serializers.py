@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import BorrowRecords, Book
+from books.models import Genre
 from django.utils.timezone import now
 
 class BorrowRecordsSerializer(serializers.ModelSerializer):
@@ -10,12 +11,16 @@ class BorrowRecordsSerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'isbn', 'published_date']
+        fields = ['id', 'cover', 'title', 'author', 'isbn', 'published_date',
+                  'publisher', 'description', 'language', 'genres']
 
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['genres'] = [genre.name for genre in instance.genres.all()]
+        return rep
 class BorrowRecordsSerializerDetail(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
     user_name = serializers.CharField(source='user.fullname', read_only=True)
-
     class Meta:
         model = BorrowRecords
         fields = ['id', 'borrow_date', 'due_date', 'return_date', 'book', 'user_name']
