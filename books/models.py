@@ -30,7 +30,7 @@ class Book(models.Model):
     cover = models.ImageField(upload_to='book_covers/', blank=True, null=True)
     title = models.CharField(max_length=255, null=False, blank=False)
     author = models.CharField(max_length=150, null=False, blank=False)
-    isbn = models.CharField(unique=True)
+    isbn = models.CharField(max_length=20, unique=True)
     published_date = TimestampWithoutTZField(null=True, blank=True)
     publisher = models.CharField(max_length=150, null=True, blank=True)
     pages = models.IntegerField(default=0)

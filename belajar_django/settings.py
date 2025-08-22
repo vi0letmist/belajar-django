@@ -1,4 +1,5 @@
 import os
+import socket
 from pathlib import Path
 from datetime import timedelta
 
@@ -7,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 DEBUG = False
-ALLOWED_HOSTS = ['vi0letmist.pythonanywhere.com']
+ALLOWED_HOSTS = ['vi0letmist.pythonanywhere.com', 'localhost']
 SECRET_KEY = 'gm0J29qbaz0y4sOCupkAicC4ZfZWkv4BeC5NrDa-iFS1ycaHjoFcYFvRX3pp2MTUc-Y'
 
 # Application definition
@@ -55,16 +56,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'belajar_django.wsgi.application'
 
 # PostgreSQL Database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'example-day-1',
-        'USER': 'postgres',
-        'PASSWORD': '121212',
-        'HOST': 'localhost',
-        'PORT': '5432',
+ON_PYTHONANYWHERE = "pythonanywhere.com" in socket.gethostname()
+
+if ON_PYTHONANYWHERE:
+    # Production: SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    # Local development: PostgreSQL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'example-day-1',
+            'USER': 'postgres',
+            'PASSWORD': '121212',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
 AUTH_USER_MODEL = 'users.User'
 # REST Framework and JWT configuration
